@@ -201,64 +201,6 @@ static int getAssertFileInfo(JNIEnv* env,char* assetfile){
 }
 
 
-/**sub_c 签名校验**/
-static int CheckSign(JNIEnv *env) {
-    int flaguser = 0, flagadmin = 0;
-    jobject jPackageInfo = Get_jPackinfo(env);
-    jobject jsignatures = NULL;
-	invoke_func()->getObject(env, &jsignatures,
-			"android/content/pm/PackageInfo", jPackageInfo,
-            "signatures","[Landroid/content/pm/Signature;");
-	if (!jsignatures) {
-		LOGE("jsignatures NULL");
-		return 0;
-	}
-	jobjectArray signatures = reinterpret_cast<jobjectArray>(jsignatures);
-	//get sign
-	jobject signature = env->GetObjectArrayElement(signatures, 0);
-	jclass signatureClazz = env->GetObjectClass(signature);
-	jmethodID toCharString = env->GetMethodID(signatureClazz, "toCharsString",
-			"()Ljava/lang/String;");
-
-	//signature toCharsString
-	jstring signCharString = static_cast<jstring>(env->CallObjectMethod(
-			signature, toCharString));
-
-	// get signature hash code
-	jclass stringClass = env->GetObjectClass(signCharString);
-	jmethodID jhashCode = env->GetMethodID(stringClass, "hashCode", "()I");
-	int hash_code = env->CallIntMethod(signCharString, jhashCode);
-
-	//LOGI("the signtures is :%d", hash_code);
-
-	if (signatureClazz != NULL){
-	    env->DeleteLocalRef(signatureClazz);
-	}
-
-	if (jPackageInfo != NULL){
-        env->DeleteLocalRef(jPackageInfo);
-	}
-	if (jsignatures != NULL){
-        env->DeleteLocalRef(jsignatures);
-	}
-
-	if (hash_code - CHECKSIGNUSER + OFFSET != 0) {
-		//LOGI("the CHECKSIGNUSER is :%d", CHECKSIGNUSER + OFFSET);
-		flaguser = 1;
-	}
-    if (hash_code - CHECKSIGNADMIN + OFFSET != 0) {
-		//LOGI("the CHECKSIGNADMIN is :%d", CHECKSIGNADMIN + OFFSET);
-		flagadmin = 1;
-	}
-
-	if(flaguser&&flagadmin){
-        LOGE("SIG ERROR!");
-        return 0;
-        //exit(-1);
-	}
-	return  (flaguser&&flagadmin)? 0 : 1;
-}
-
 /**jContextWrapper_getApkPath**/
 static jobject GetApkPath(JNIEnv *env) {
     jobject source_dir = NULL;
@@ -283,44 +225,5 @@ static jobject GetApkPath(JNIEnv *env) {
 	}
 	return source_dir;
 }
-
-/**DEX文件校验**/
-static void* Check(void* arg){
-    /**..do something.**/
-
-//调用回调函数处理
-_end:
-    if(callfunc()==0){
-        LOGD("callback success");
-    }else{
-        if (res1&&res2&&res3&&res4){
-            return NULL;
-        }
-        else{
-            LOGD("NO CALLBACK EXIT");
-            exit(-1);
-        }
-    }
-    return NULL;
-}
-
-void do_check(JNIEnv *env){
-    Create_thread(&Check, NULL);
-    return ;
-}
-
-void start(JNIEnv* env, callback CB, void *oq){
-
-    if(CONFIG_OPEN){
-        do_check(env);
-    }
-}
-
-//test linker bug
-/**
-__attribute__((constructor)) void testlinker(){
-    LOGD("dexcount init:%d",sub_cxd5);
-    return;
-}**/
 
 
