@@ -21,7 +21,7 @@ typedef struct ApkUtils{
 	bool (*getEncryptDexData)(const char *pApkPath,unsigned char **ppdata, size_t *unsize) ;
 	bool (*getDexMethodData)(const char *pApkPath,unsigned char **ppdata, size_t *unsize) ;
 	bool (*getZipEntry)(const char *pApkPath,const char * zipentry,unsigned char **ppdata, size_t *unsize);
-	bool (*getAjmEntry)(const char *zipBuf,size_t size, const char * zipentry,unsigned char **ppdata, size_t *unsize);
+	bool (*getEntry)(const char *zipBuf,size_t size, const char * zipentry,unsigned char **ppdata, size_t *unsize);
 	bool (*closeZip)();
 	bool (*getZipEntryOnce)(const char *pApkPath, const char * zipentry,
 			unsigned char **ppdata, size_t *unsize);
